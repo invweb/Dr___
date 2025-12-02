@@ -17,7 +17,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -73,6 +78,7 @@ class MainActivity : ComponentActivity() {
                                             finishAndRemoveTask()
                                         }
                                     }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack,"")
                                     }
                                 }
                             )
@@ -90,6 +96,15 @@ class MainActivity : ComponentActivity() {
                                 composable("ShowApplications") {
                                     ShowApplications(
                                         ctx,
+                                        navController = navController,
+                                        viewModel = viewModel,
+                                        appInfoList = appsInfo
+                                    )
+                                }
+                                composable("ItemComposable") {
+                                    ItemComposable(
+                                        ctx,
+                                        navController = navController,
                                         viewModel = viewModel,
                                         appInfoList = appsInfo
                                     )
@@ -105,7 +120,12 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
-    private fun ItemComposable(navController: NavHostController) {
+    private fun ItemComposable(
+        ctx: Context,
+        navController: NavHostController,
+        viewModel: MainViewModel,
+        appInfoList: List<ApplicationInfo>
+    ) {
         counter++
         Scaffold(modifier = Modifier.padding(16.dp), content = {
             Column(
@@ -113,24 +133,18 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-//                Image(
-//                    painter = rememberImagePainter(content!!.photo),
-//                    contentDescription = null,
-//                    modifier = Modifier.size(256.dp)
-//                )
-//                Text(style = typography.h6,
-//                    text = content!!.name)
-//                Text(text = content!!.address)
-//                Text(text = content!!.description)
+                Button(onClick = {navController.popBackStack()}) {
+                    Text("<--", fontSize = 25.sp)
+                }
             }
         })
     }
-
 }
 
 @Composable
 fun ShowApplications(
     ctx: Context,
+    navController: NavHostController,
     viewModel: MainViewModel,
     appInfoList: List<ApplicationInfo>
 ) {
@@ -147,6 +161,7 @@ fun ShowApplications(
                         .clickable(
                             onClick = {
                                 Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
+                                navController.navigate("ItemComposable")
                             },
                             interactionSource = interactionSource,
                             indication = ripple()
