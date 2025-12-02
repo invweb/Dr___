@@ -1,5 +1,6 @@
 package com.vsk.dr
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
@@ -26,12 +27,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vsk.dr.ui.theme.Dr___Theme
 import timber.log.Timber
@@ -78,27 +83,36 @@ class MainActivity : ComponentActivity() {
                                 .padding(innerPadding),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            ShowApplications(
-                                ctx,
-                                viewModel = viewModel,
-                                appInfoList = appsInfo
-                            )
+                            NavHost(
+                                navController = navController,
+                                startDestination = "ShowApplications"
+                            ) {
+                                composable("ShowApplications") {
+                                    ShowApplications(
+                                        ctx,
+                                        viewModel = viewModel,
+                                        appInfoList = appsInfo
+                                    )
+                                }
+                            }
+
                         }
                     }
                 }
             }
         }
+    }
 
-//    @ExperimentalCoilApi
-//    @Composable
-//    private fun ItemComposable(navController: NavHostController) {
-//        counter++
-//        Scaffold(modifier = Modifier.padding(16.dp), content = {
-//            Column(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalArrangement = Arrangement.Top,
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    @Composable
+    private fun ItemComposable(navController: NavHostController) {
+        counter++
+        Scaffold(modifier = Modifier.padding(16.dp), content = {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 //                Image(
 //                    painter = rememberImagePainter(content!!.photo),
 //                    contentDescription = null,
@@ -108,40 +122,39 @@ class MainActivity : ComponentActivity() {
 //                    text = content!!.name)
 //                Text(text = content!!.address)
 //                Text(text = content!!.description)
-//            }
-//        })
-//    }
-
+            }
+        })
     }
 
-    @Composable
-    fun ShowApplications(
-        ctx: Context,
-        viewModel: MainViewModel,
-        appInfoList: List<ApplicationInfo>
-    ) {
-        LazyColumn {
-            items(appInfoList.size) { item ->
-                val interactionSource = remember { MutableInteractionSource() }
-                viewModel.getApplicationName(appInfoList[item])?.let {
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .padding(16.dp)
-                            .clickable(
-                                onClick = {
-                                    Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
-                                },
-                                interactionSource = interactionSource,
-                                indication = ripple()
-                            ),
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Center
-                    )
-                }
+}
+
+@Composable
+fun ShowApplications(
+    ctx: Context,
+    viewModel: MainViewModel,
+    appInfoList: List<ApplicationInfo>
+) {
+    LazyColumn {
+        items(appInfoList.size) { item ->
+            val interactionSource = remember { MutableInteractionSource() }
+            viewModel.getApplicationName(appInfoList[item])?.let {
+                Text(
+                    text = it,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .padding(16.dp)
+                        .clickable(
+                            onClick = {
+                                Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
+                            },
+                            interactionSource = interactionSource,
+                            indication = ripple()
+                        ),
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
