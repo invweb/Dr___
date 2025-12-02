@@ -42,8 +42,8 @@ android {
 }
 
 dependencies {
-    implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation("androidx.navigation:navigation-compose:2.9.6")
+    implementation(libs.timber)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
