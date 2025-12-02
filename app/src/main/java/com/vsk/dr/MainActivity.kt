@@ -42,6 +42,7 @@ import timber.log.Timber
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
     private var counter: Int = 0
+    private val ctx = this
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,36 +56,42 @@ class MainActivity : ComponentActivity() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Dr___Theme {
                     val navController = rememberNavController()
-                    Scaffold(topBar = {
-                        TopAppBar(
-                            title = {
-                                Text(text = getString(R.string.app_name))
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    if(counter > 0) {
-                                        counter--
-                                        navController.popBackStack()
-                                    } else {
-                                        finishAndRemoveTask()
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Text(text = getString(R.string.app_name))
+                                },
+                                navigationIcon = {
+                                    IconButton(onClick = {
+                                        if (counter > 0) {
+                                            counter--
+                                            navController.popBackStack()
+                                        } else {
+                                            finishAndRemoveTask()
+                                        }
+                                    }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "")
                                     }
-                                }) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack,"")
                                 }
-                            }
-                        )
-
-                    }, modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        ShowApplications(
-                            this,
-                            viewModel = viewModel,
-                            appInfoList = appsInfo
-                        )
+                            )
+                        }, modifier = Modifier.fillMaxSize()
+                    ) { innerPadding ->
+                        Column(
+                            modifier = Modifier
+                                .padding(innerPadding),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            ShowApplications(
+                                ctx,
+                                viewModel = viewModel,
+                                appInfoList = appsInfo
+                            )
+                        }
                     }
                 }
             }
         }
-    }
 
 //    @ExperimentalCoilApi
 //    @Composable
@@ -109,31 +116,36 @@ class MainActivity : ComponentActivity() {
 //        })
 //    }
 
-}
+    }
 
-@Composable
-fun ShowApplications(ctx: Context, viewModel: MainViewModel, appInfoList: List<ApplicationInfo>) {
-
-    LazyColumn {
-        items(appInfoList.size) { item ->
-            val interactionSource = remember { MutableInteractionSource() }
-            viewModel.getApplicationName(appInfoList[item])?.let {
-                Text(
-                    text = it,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(16.dp)
-                        .padding(16.dp)
-                        .clickable (
-                            onClick = {
-                                Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
-                            },
-                            interactionSource = interactionSource,
-                            indication = ripple()
-                        ),
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
+    @Composable
+    fun ShowApplications(
+        ctx: Context,
+        viewModel: MainViewModel,
+        appInfoList: List<ApplicationInfo>
+    ) {
+        LazyColumn {
+            items(appInfoList.size) { item ->
+                val interactionSource = remember { MutableInteractionSource() }
+                viewModel.getApplicationName(appInfoList[item])?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(16.dp)
+                            .clickable(
+                                onClick = {
+                                    Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
+                                },
+                                interactionSource = interactionSource,
+                                indication = ripple()
+                            ),
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
                     )
+                }
             }
         }
     }
