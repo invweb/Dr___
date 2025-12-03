@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -45,6 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vsk.dr.ui.theme.Dr___Theme
 import timber.log.Timber
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -127,6 +129,10 @@ class MainActivity : ComponentActivity() {
         viewModel: MainViewModel,
         appInfoList: List<PackageInfo>
     ) {
+        val pInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+        val longVersionCode = PackageInfoCompat.getLongVersionCode(pInfo)
+        val versionCode = longVersionCode.toInt() // avoid huge version numbers and you will be ok
+
         counter++
         Scaffold(modifier = Modifier.padding(16.dp), content = {
             Column(
@@ -138,11 +144,20 @@ class MainActivity : ComponentActivity() {
                 val appInfo: ApplicationInfo = appInfoList[masterItemId].applicationInfo!!
                 Text(packageManager.getApplicationLabel(appInfo).toString())
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_name) + ":")
-                Text(viewModel.getVersionName(appInfoList[masterItemId]))
+                Text(versionCode.toString())
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.package_name) + ":")
                 Text(appInfoList[masterItemId].packageName)
                 Button(onClick = { navController.popBackStack() }) {
                     Text("<--", fontSize = 25.sp)
+                }
+                Button(onClick = {
+                    val launchIntent =
+                        packageManager.getLaunchIntentForPackage(
+                            appInfoList[masterItemId].packageName
+                        )
+                    startActivity(launchIntent)
+                }) {
+                    Text("open", fontSize = 25.sp)
                 }
             }
         })
