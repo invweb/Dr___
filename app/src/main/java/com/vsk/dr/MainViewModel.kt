@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getInstalledApps(): MutableList<PackageInfo> {
@@ -37,6 +39,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return packageInfo!!.longVersionCode
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
+        }
+        return null
+    }
+
+    fun getVersionName(packageName: String): String? {
+        try {
+            val packageInfo = application.packageManager.getPackageInfo(packageName, 0)
+            return packageInfo!!.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+
+        } catch (e: NoSuchAlgorithmException) {
+
         }
         return null
     }

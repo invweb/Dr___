@@ -4,4 +4,5 @@
     <string name="title">Title</string>
     <string name="version_name">Version name</string>
     <string name="localId">Local id</string>
+    <string name="version_code">version code</string>
 </resources>

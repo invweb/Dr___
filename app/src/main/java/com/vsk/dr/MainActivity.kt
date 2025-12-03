@@ -143,8 +143,10 @@ class MainActivity : ComponentActivity() {
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
                 val appInfo: ApplicationInfo = appInfoList[masterItemId].applicationInfo!!
                 Text(packageManager.getApplicationLabel(appInfo).toString())
-                Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_name) + ":")
+                Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_code) + ":")
                 Text(versionCode.toString())
+                Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_name) + ":")
+                Text(viewModel.getVersionName(appInfoList[masterItemId].packageName)!!)
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.package_name) + ":")
                 Text(appInfoList[masterItemId].packageName)
                 Button(onClick = { navController.popBackStack() }) {
