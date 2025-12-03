@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Dr___</string>
+    <string name="package_name">Package</string>
+    <string name="title">Title</string>
+    <string name="version_name">Version name</string>
+    <string name="localId">Local id</string>
 </resources>

@@ -3,12 +3,12 @@ package com.vsk.dr
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +50,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
     private var counter: Int = 0
     private val ctx = this
+
+    private var masterItemId: Int = 0
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +80,7 @@ class MainActivity : ComponentActivity() {
                                             finishAndRemoveTask()
                                         }
                                     }) {
-                                        Icon(Icons.AutoMirrored.Filled.ArrowBack,"")
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "")
                                     }
                                 }
                             )
@@ -101,16 +103,16 @@ class MainActivity : ComponentActivity() {
                                         appInfoList = appsInfo
                                     )
                                 }
-                                composable("ItemComposable") {
+                                composable(
+                                    "ItemComposable",
+                                ) {
                                     ItemComposable(
-                                        ctx,
                                         navController = navController,
                                         viewModel = viewModel,
                                         appInfoList = appsInfo
                                     )
                                 }
                             }
-
                         }
                     }
                 }
@@ -121,10 +123,9 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     private fun ItemComposable(
-        ctx: Context,
         navController: NavHostController,
         viewModel: MainViewModel,
-        appInfoList: List<ApplicationInfo>
+        appInfoList: List<PackageInfo>
     ) {
         counter++
         Scaffold(modifier = Modifier.padding(16.dp), content = {
@@ -133,43 +134,55 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(onClick = {navController.popBackStack()}) {
+                Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
+                val appInfo: ApplicationInfo = appInfoList[masterItemId].applicationInfo!!
+                Text(packageManager.getApplicationLabel(appInfo).toString())
+                Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_name) + ":")
+                Text(viewModel.getVersionName(appInfoList[masterItemId]))
+                Text(fontWeight = FontWeight.Bold, text = getString(R.string.package_name) + ":")
+                Text(appInfoList[masterItemId].packageName)
+                Button(onClick = { navController.popBackStack() }) {
                     Text("<--", fontSize = 25.sp)
                 }
             }
         })
     }
-}
 
-@Composable
-fun ShowApplications(
-    ctx: Context,
-    navController: NavHostController,
-    viewModel: MainViewModel,
-    appInfoList: List<ApplicationInfo>
-) {
-    LazyColumn {
-        items(appInfoList.size) { item ->
-            val interactionSource = remember { MutableInteractionSource() }
-            viewModel.getApplicationName(appInfoList[item])?.let {
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .padding(16.dp)
-                        .clickable(
-                            onClick = {
-                                Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
-                                navController.navigate("ItemComposable")
-                            },
-                            interactionSource = interactionSource,
-                            indication = ripple()
-                        ),
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
+    @Composable
+    fun ShowApplications(
+        ctx: Context,
+        navController: NavHostController,
+        viewModel: MainViewModel,
+        appInfoList: List<PackageInfo>
+    ) {
+        LazyColumn {
+            items(appInfoList.size) { item ->
+                val interactionSource = remember { MutableInteractionSource() }
+                viewModel.getApplicationName(appInfoList[item].applicationInfo)?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(16.dp)
+                            .clickable(
+                                onClick = {
+                                    masterItemId = item
+                                    Toast.makeText(
+                                        ctx,
+                                        it,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.navigate("ItemComposable")
+                                },
+                                interactionSource = interactionSource,
+                                indication = ripple()
+                            ),
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
