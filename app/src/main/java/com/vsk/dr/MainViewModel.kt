@@ -1,16 +1,21 @@
 package com.vsk.dr
 
 import android.app.Application
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getInstalledApps(): MutableList<PackageInfo> {
@@ -23,7 +28,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getApplicationName(resolveInfo: ApplicationInfo?): String? {
-        return resolveInfo?.nonLocalizedLabel?.toString()
+        return resolveInfo?.name?.toString()
+//        return resolveInfo?.nonLocalizedLabel?.toString()
     }
 
     fun getVersionName(packageInfo: PackageInfo): String {
@@ -53,5 +59,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         }
         return null
+    }
+
+    fun getFullResIcon(info: ActivityInfo): Drawable? {
+        val resources = try {
+            application.packageManager.getResourcesForApplication(info.applicationInfo)
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+        if (resources != null) {
+            val iconId = info.iconResource
+            if (iconId != 0) {
+                return getFullResIcon(info)
+            }
+        }
+        return null
+    }
+
+    fun openApp(context: Context, packageName: String): Boolean {
+        val manager = context.packageManager
+        try {
+            val i = manager.getLaunchIntentForPackage(packageName) ?: return false
+            //throw new ActivityNotFoundException();
+            i.addCategory(Intent.CATEGORY_LAUNCHER)
+            context.startActivity(i)
+            return true
+        } catch (e: ActivityNotFoundException) {
+            return false
+        }
     }
 }

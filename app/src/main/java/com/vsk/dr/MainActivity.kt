@@ -4,11 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +49,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.vsk.dr.tech.Fun
 import com.vsk.dr.ui.theme.Dr___Theme
 import timber.log.Timber
 
@@ -82,7 +89,10 @@ class MainActivity : ComponentActivity() {
                                             finishAndRemoveTask()
                                         }
                                     }) {
-                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "")
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ArrowBack,
+                                            ""
+                                        )
                                     }
                                 }
                             )
@@ -132,7 +142,7 @@ class MainActivity : ComponentActivity() {
         val pInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
         val longVersionCode = PackageInfoCompat.getLongVersionCode(pInfo)
         val versionCode = longVersionCode.toInt() // avoid huge version numbers and you will be ok
-
+        val context = this
         counter++
         Scaffold(modifier = Modifier.padding(16.dp), content = {
             Column(
@@ -140,10 +150,35 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val appInfo: ApplicationInfo? = appInfoList[masterItemId].applicationInfo
+//                val drawable : Drawable = packageManager.getApplicationIcon(
+//                    appInfoList[masterItemId].packageName
+//                )
+//                        as BitmapDrawable).bitmap
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
-                val appInfo: ApplicationInfo = appInfoList[masterItemId].applicationInfo!!
-                Text(packageManager.getApplicationLabel(appInfo).toString())
-                Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_code) + ":")
+                appInfo?.let {
+
+                    if (it.className != null) {
+                        val icon: ImageBitmap? = Fun.getAppIcon(
+                            packageManager,
+                            it.className
+                        ) as ImageBitmap?
+                       icon?.let {image ->
+                           Image(
+                               bitmap = image,
+                               contentDescription = "application logo"
+                           )
+                       }
+                    }
+                    Text(packageManager.getApplicationLabel(it).toString())
+                }
+
+                Text(
+                    fontWeight = FontWeight.Bold, text = getString(
+                        R.string.version_code
+                    ) + ":"
+                )
+
                 Text(versionCode.toString())
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.version_name) + ":")
                 Text(viewModel.getVersionName(appInfoList[masterItemId].packageName)!!)
@@ -153,14 +188,14 @@ class MainActivity : ComponentActivity() {
                     Text("<--", fontSize = 25.sp)
                 }
                 Button(onClick = {
-                    val launchIntent =
-                        packageManager.getLaunchIntentForPackage(
-                            appInfoList[masterItemId].packageName
-                        )
-                    startActivity(launchIntent)
+                    appInfoList[masterItemId].packageName?.let {
+                        viewModel.openApp(this@MainActivity, it)
+                    }
                 }) {
                     Text("open", fontSize = 25.sp)
                 }
+
+                Fun.getIconFromPackageName(appInfoList[masterItemId].packageName, ctx)
             }
         })
     }
@@ -174,10 +209,12 @@ class MainActivity : ComponentActivity() {
     ) {
         LazyColumn {
             items(appInfoList.size) { item ->
+                masterItemId = item
                 val interactionSource = remember { MutableInteractionSource() }
                 viewModel.getApplicationName(appInfoList[item].applicationInfo)?.let {
+                    val appInfo: ApplicationInfo? = appInfoList[masterItemId].applicationInfo
                     Text(
-                        text = it,
+                        text = packageManager.getApplicationLabel(appInfo!!).toString(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
