@@ -49,7 +49,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.vsk.dr.tech.Fun
 import com.vsk.dr.ui.theme.Dr___Theme
 import timber.log.Timber
@@ -66,8 +65,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        val appsInfo = viewModel.getInstalledApps()
-        Timber.d("installed applications size: ${appsInfo.size}")
+        val appsInfo = viewModel.getInstalledApps().value
+        if (appsInfo != null) {
+            Timber.d("installed applications size: ${appsInfo.size}")
+        }
         enableEdgeToEdge()
 
         setContent {
@@ -108,21 +109,25 @@ class MainActivity : ComponentActivity() {
                                 startDestination = "ShowApplications"
                             ) {
                                 composable("ShowApplications") {
-                                    ShowApplications(
-                                        ctx,
-                                        navController = navController,
-                                        viewModel = viewModel,
-                                        appInfoList = appsInfo
-                                    )
+                                    if (appsInfo != null) {
+                                        ShowApplications(
+                                            ctx,
+                                            navController = navController,
+                                            viewModel = viewModel,
+                                            appInfoList = appsInfo
+                                        )
+                                    }
                                 }
                                 composable(
                                     "ItemComposable",
                                 ) {
-                                    ItemComposable(
-                                        navController = navController,
-                                        viewModel = viewModel,
-                                        appInfoList = appsInfo
-                                    )
+                                    if (appsInfo != null) {
+                                        ItemComposable(
+                                            navController = navController,
+                                            viewModel = viewModel,
+                                            appInfoList = appsInfo
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -142,7 +147,6 @@ class MainActivity : ComponentActivity() {
         val pInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
         val longVersionCode = PackageInfoCompat.getLongVersionCode(pInfo)
         val versionCode = longVersionCode.toInt() // avoid huge version numbers and you will be ok
-        val context = this
         counter++
         Scaffold(modifier = Modifier.padding(16.dp), content = {
             Column(
@@ -188,7 +192,7 @@ class MainActivity : ComponentActivity() {
                     Text("<--", fontSize = 25.sp)
                 }
                 Button(onClick = {
-                    appInfoList[masterItemId].packageName?.let {
+                    appInfoList[masterItemId].packageName.let {
                         viewModel.openApp(this@MainActivity, it)
                     }
                 }) {

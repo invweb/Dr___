@@ -13,22 +13,27 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.application
+import timber.log.Timber
 import java.security.NoSuchAlgorithmException
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    fun getInstalledApps(): MutableList<PackageInfo> {
+    private val liveDataApps = MutableLiveData<MutableList<PackageInfo>>()
+
+    fun getInstalledApps(): MutableLiveData<MutableList<PackageInfo>> {
         val flags = PackageManager.GET_META_DATA or
                 PackageManager.GET_SHARED_LIBRARY_FILES
 
         val pm: PackageManager = application.packageManager
         val applications: MutableList<PackageInfo> = pm.getInstalledPackages(flags)
-        return applications
+        liveDataApps.value = applications
+        return liveDataApps
     }
 
     fun getApplicationName(resolveInfo: ApplicationInfo?): String? {
-        return resolveInfo?.name?.toString()
+        return resolveInfo?.name
 //        return resolveInfo?.nonLocalizedLabel?.toString()
     }
 
@@ -54,9 +59,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val packageInfo = application.packageManager.getPackageInfo(packageName, 0)
             return packageInfo!!.versionName
         } catch (e: PackageManager.NameNotFoundException) {
-
+            Timber.d(e)
         } catch (e: NoSuchAlgorithmException) {
-
+            Timber.d(e)
         }
         return null
     }
@@ -65,6 +70,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val resources = try {
             application.packageManager.getResourcesForApplication(info.applicationInfo)
         } catch (e: PackageManager.NameNotFoundException) {
+            Timber.d(e)
             null
         }
         if (resources != null) {
@@ -85,6 +91,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             context.startActivity(i)
             return true
         } catch (e: ActivityNotFoundException) {
+            Timber.d(e)
             return false
         }
     }
