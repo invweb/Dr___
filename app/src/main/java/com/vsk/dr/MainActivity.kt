@@ -161,7 +161,8 @@ class MainActivity : ComponentActivity() {
 //                        as BitmapDrawable).bitmap
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
                 appInfo?.let {
-                    Text(appInfo.sourceDir + " - " + packageManager.getApplicationLabel(it).toString())
+                    Text(appInfo.sourceDir)
+                    Text(packageManager.getApplicationLabel(it).toString())
                     if (it.className != null) {
                         val icon: ImageBitmap? = Fun.getAppIcon(
                             packageManager,
