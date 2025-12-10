@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity() {
 //                        as BitmapDrawable).bitmap
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
                 appInfo?.let {
-
+                    Text(appInfo.sourceDir + " - " + packageManager.getApplicationLabel(it).toString())
                     if (it.className != null) {
                         val icon: ImageBitmap? = Fun.getAppIcon(
                             packageManager,
@@ -219,6 +219,30 @@ class MainActivity : ComponentActivity() {
                     val appInfo: ApplicationInfo? = appInfoList[masterItemId].applicationInfo
                     Text(
                         text = packageManager.getApplicationLabel(appInfo!!).toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(16.dp)
+                            .clickable(
+                                onClick = {
+                                    masterItemId = item
+                                    Toast.makeText(
+                                        ctx,
+                                        it,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.navigate("ItemComposable")
+                                },
+                                interactionSource = interactionSource,
+                                indication = ripple()
+                            ),
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        text = appInfo.dataDir,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
