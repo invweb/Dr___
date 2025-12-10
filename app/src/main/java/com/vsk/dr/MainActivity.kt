@@ -49,6 +49,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.vsk.dr.tech.CheckSum
 import com.vsk.dr.tech.Fun
 import com.vsk.dr.ui.theme.Dr___Theme
 import timber.log.Timber
@@ -161,8 +162,9 @@ class MainActivity : ComponentActivity() {
 //                        as BitmapDrawable).bitmap
                 Text(fontWeight = FontWeight.Bold, text = getString(R.string.title) + ":")
                 appInfo?.let {
-                    Text(appInfo.sourceDir)
                     Text(packageManager.getApplicationLabel(it).toString())
+                    Text("SHA256: " + CheckSum.generateSHA256(appInfo.sourceDir))
+                    Text("apk path: " + appInfo.sourceDir)
                     if (it.className != null) {
                         val icon: ImageBitmap? = Fun.getAppIcon(
                             packageManager,
