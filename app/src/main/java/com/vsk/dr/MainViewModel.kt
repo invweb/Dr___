@@ -95,4 +95,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return false
         }
     }
+
+    fun getApkPath(context: Context, packageName: String): String? {
+        val pm = context.packageManager
+        try {
+            val ai = pm.getApplicationInfo(packageName, 0)
+            val apk = ai.publicSourceDir
+            return apk
+        } catch (x: Throwable) {
+        }
+        return null
+    }
 }
